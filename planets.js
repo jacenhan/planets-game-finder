@@ -51,7 +51,7 @@ function loadGames(args, callback) {
 	var numText = document.getElementById("numGames");
 	numText.textContent = "Searching...";
 
-	fetch("http://api.planets.nu/games/list" + args)
+	fetch("https://api.planets.nu/games/list" + args)
 		.then(response => response.json())
 		.then(data => {
 			data.sort(function(a, b) {
@@ -156,7 +156,7 @@ function getDetailsOfGames(games) {
 }
 
 function getIndividualGame(id) {
-	return fetch("http://api.planets.nu/game/loadinfo?gameid=" + id)
+	return fetch("https://api.planets.nu/game/loadinfo?gameid=" + id)
 		.then(response => response.json())
 		.then(data => {
 			return data;
