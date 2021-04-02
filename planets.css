@@ -1,0 +1,96 @@
+html {
+	overflow-y: scroll;
+
+	font-size: 0.8em;
+}
+
+body {
+	margin: 0;
+	
+	background-image: url("img/space.jpg");
+    background-size: cover;
+    background-attachment: fixed;
+
+	font-family: "Arial", sans-serif;
+
+	padding: 20px;
+}
+
+#pageContainer {
+	max-width: 1400px;
+	margin: auto;
+
+	margin-top: 50px;
+	margin-bottom: 50px;
+	padding: 20px;
+	
+	border-radius: 10px;
+
+	background: #373737;
+	color: #bbcccc;
+
+	box-sizing: border-box;
+
+	background-image: linear-gradient(to bottom, rgba(52,60,60,1) 0, rgba(26,30,30,1) 100px);
+	opacity: 0.95;
+}
+
+#games {
+	display: flex;
+	flex-direction: column;
+	margin: auto;
+
+	margin-top: 10px;
+}
+
+.gameContainer {
+	display: flex;
+	flex-direction: row;
+	
+	padding: 20px;
+}
+
+.gameContainer:not(:first-of-type) {
+	border-top: solid 1px #bbcccc;
+}
+
+.box1 {
+	min-width: 300px;
+}
+
+a {
+	color: cyan;
+}
+
+.gameItemName {
+	margin: 0;
+	margin-bottom: 5px;
+	font-size: 1.4em;
+}
+
+.gameItemShortDesc {
+	color: white;
+	margin-top: 0px;
+}
+
+.gameItemSlots {
+	position: relative;
+
+	text-decoration: underline;
+}
+
+.gameItemSlotsLong {
+	width: 300px;
+	background: #1a1a1a;
+	color: #bbcccc;
+
+	padding: 15px;
+	border-radius: 10px;
+
+	display: none;
+	position: absolute;
+}
+
+.gameItemSlots:hover > .gameItemSlotsLong {
+	display: block;
+}
