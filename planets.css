@@ -37,6 +37,70 @@ body {
 	opacity: 0.95;
 }
 
+#filterBox {
+	margin: 10px;
+	padding: 10px;
+	
+	background: #080808;
+	border-radius: 10px;
+}
+
+#filterTitle {
+	margin: 0;
+	font-size: 1.8em;
+	border-bottom: 1px solid #bbcccc;
+	padding: 5px;
+}
+
+#filtersContainer {
+	display: flex;
+	flex-direction: row;
+}
+
+.filterName {
+	margin: 5px;
+
+	font-size: 1.4em;
+	text-align: center;
+}
+
+.filterList {
+	width: auto;
+	margin: 10px;
+	min-width: 150px;
+
+	display: inline-flex;
+	flex-direction: column;
+	padding: 3px;
+}
+
+.checkboxContainer {
+	margin: 1px;
+	margin-left: 10px;
+	margin-right: 10px;
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+	justify-content: start;
+	vertical-align: middle;
+	align-items: center;
+	width: auto;
+}
+
+.statuscheckbox {
+	width: 18px;
+	height: 18px;
+}
+
+.checkLabel {
+	font-size: 1.2em;
+	margin: 0;
+	margin-left: 5px;
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+}
+
 #games {
 	display: flex;
 	flex-direction: column;
@@ -83,7 +147,7 @@ a {
 
 .gameItemSlotsLong {
 	width: 300px;
-	background: #1a1a1a;
+	background: #080808;
 	color: #bbcccc;
 
 	padding: 15px;

@@ -4,7 +4,7 @@ function findJoining() {
 	var gameList = document.getElementById("games");
 	removeAllChildNodes(gameList);
 
-	loadGames("?status=1", function(val) {
+	loadGames("?" + getQueryParams(), function(val) {
 		console.log(val);
 
 		getDetailsOfGames(val).then(data => {
@@ -24,7 +24,7 @@ function findReplacements() {
 	var gameList = document.getElementById("games");
 	removeAllChildNodes(gameList);
 
-	loadGames("?status=2,4", function(val) {
+	loadGames("?" + getQueryParams(), function(val) {
 		var newlist = [];
 		for (var i = 0; i < val.length; i++) {
 			if (val[i].turnstatus.includes("o")) {
@@ -118,15 +118,17 @@ function gameDetailToHtml(gameDetail) {
 		}
 	}
 
-	var slotsBox = document.createElement("div");
-	slotsBox.className = "gameItemSlotsLong";
-	slotsBox.textContent = slotsTextLong;
-
 	var slots = document.createElement("p");
 	slots.className = "gameItemSlots";
 	slots.textContent = slotsText;
-	slots.appendChild(slotsBox);
 	box1.appendChild(slots);
+
+	if (open.length > 0) {
+		var slotsBox = document.createElement("div");
+		slotsBox.className = "gameItemSlotsLong";
+		slotsBox.textContent = slotsTextLong;
+		slots.appendChild(slotsBox);
+	}
 
 	// Date created
 	var created = document.createElement("p");
@@ -161,6 +163,62 @@ function getIndividualGame(id) {
 		.then(data => {
 			return data;
 		});
+}
+
+function getQueryParams() {
+	// Game status
+	var status = "status=";
+	var first = true;
+
+	var item = document.getElementById("interest");
+	if (item.checked == true) { status += "0"; first = false; }
+
+	item = document.getElementById("joining");
+	if (item.checked == true) { if (!first) { status += "," } status += "1"; first = false; }
+
+	item = document.getElementById("running");
+	if (item.checked == true) { if (!first) { status += "," } status += "2"; first = false; }
+
+	item = document.getElementById("finished");
+	if (item.checked == true) { if (!first) { status += "," } status += "3"; first = false; }
+
+	item = document.getElementById("onhold");
+	if (item.checked == true) { if (!first) { status += "," } status += "4"; first = false; }
+
+	if (first) {
+		status = "status=1,2";
+	}
+
+	// Game types
+	var type = "type=";
+	first = true;
+
+	item = document.getElementById("training");
+	if (item.checked == true) { type += "1"; first = false; }
+
+	item = document.getElementById("classic");
+	if (item.checked == true) { if (!first) { type += "," } type += "2"; first = false; }
+
+	item = document.getElementById("team");
+	if (item.checked == true) { if (!first) { type += "," } type += "3"; first = false; }
+
+	item = document.getElementById("melee");
+	if (item.checked == true) { if (!first) { type += "," } type += "4"; first = false; }
+
+	item = document.getElementById("blitz");
+	if (item.checked == true) { if (!first) { type += "," } type += "5"; first = false; }
+
+	item = document.getElementById("champion");
+	if (item.checked == true) { if (!first) { type += "," } type += "6"; first = false; }
+
+	item = document.getElementById("academy");
+	if (item.checked == true) { if (!first) { type += "," } type += "7"; first = false; }
+
+	if (first) {
+		type = "type=2,3,4";
+	}
+
+	return status + "&" + type;
 }
 
 function raceIdToString(id) {
