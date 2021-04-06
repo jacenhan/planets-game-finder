@@ -53,6 +53,7 @@ function loadGames(args, callback) {
 
 	fetch("https://api.planets.nu/games/list" + args)
 		.then(response => response.json())
+		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - Pampelmops - Filter by game attributes
 		.then(data => {
 			data.sort(function(a, b) {
 				return Date.parse(b.datecreated) - Date.parse(a.datecreated);
@@ -60,6 +61,19 @@ function loadGames(args, callback) {
 
 			callback(data);
 		});
+}
+
+// 2021-04-06 - Pampelmops - Function to filter by game attributes
+function filterByGameAttributes(game) {
+	// Difficulty Modifier
+	var item = document.getElementById("difficultyModifier");
+	if (item.checked) {
+		var from = document.getElementById("difficultyModifierFrom").value;
+		var to = document.getElementById("difficultyModifierTo").value;
+		if (game.difficulty < from  ||  game.difficulty > to) return false;
+	}
+	
+	return true;
 }
 
 function gameDetailToHtml(gameDetail) {
@@ -135,6 +149,20 @@ function gameDetailToHtml(gameDetail) {
 	created.className = "gameItemDateCreated";
 	box1.appendChild(created);
 	created.textContent = "Game created " + game.datecreated;
+	
+	// 2021-04-06 - Pampelmops - Show difficulty modifier and host days
+
+	// Difficulty modifier
+	var difficulty = document.createElement("p");
+	difficulty.className = "gameItemDifficulty";
+	box1.appendChild(difficulty);
+	difficulty.textContent = "Difficulty Modifier: " + Math.round(game.difficulty*100)/100;
+
+	// Host days
+	var hostDays = document.createElement("p");
+	hostDays.className = "gameItemHostDays";
+	box1.appendChild(hostDays);
+	hostDays.textContent = "Host days: " + game.hostdays;
 
 	// Box 2
 	var box2 = document.createElement("div");
