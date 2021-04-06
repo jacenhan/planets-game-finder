@@ -92,6 +92,11 @@ body {
 	height: 18px;
 }
 
+.inputrange {
+	width: 50px;
+	height: 18px;
+}
+
 .checkLabel {
 	font-size: 1.2em;
 	margin: 0;
