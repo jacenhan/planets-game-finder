@@ -7,7 +7,7 @@
 
 <body>
 	<div id="pageContainer">
-		<h1>Planets Nu Game Finder v0.3</h1>
+		<h1>Planets Nu Game Finder v0.4</h1>
 		<p>Use this tool to find games to join in <a href="https://planets.nu/" target="_blank">VGA Planets Nu</a>.</p>
 		<p>Click on a sector name to go to it on the Planets Nu site, and mouse over the number of slots to see what races are available to join as.</p>
 		<div id="filterBox">
@@ -31,7 +31,7 @@
 					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="champion"/><p class="checkLabel">Championship</p></div>
 					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="academy"/><p class="checkLabel">Academy</p></div>
 				</div>
-				<!-- 2021-04-06 - Pampelmops - New category for game attributes -->
+				<!-- 2021-04-06 - v0.3 - Pampelmops - New category for game attributes -->
 				<div class="filterList" id="gameAttributes">
 					<p class="filterName">Game Attributes</p>
 					<!-- Difficulty modifier -->
@@ -43,6 +43,18 @@
 						<p class="checkLabel"> to </p>
 						<input class="inputrange" type="range" id="difficultyModifierTo" min="0" max="2" step="0.1" value="1.5" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
 						<p class="checkLabel">(1.5)</p>
+					</div>
+					<!-- 2021-04-12 - v0.4 - Exclude beginner games -->
+					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="excludeBeginner"/><p class="checkLabel">Exclude beginner games</p></div>
+					<!-- 2021-04-12 - v0.4 - Turns per week -->
+					<div class="checkboxContainer">
+						<input class="statuscheckbox" type="checkbox" id="turnsPerWeek"/>
+						<p class="checkLabel">Turns per week:</p>
+						<input class="inputrange" type="range" id="turnsPerWeekFrom" min="1" max="7" step="1" value="1" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
+						<p class="checkLabel">(1)</p>
+						<p class="checkLabel"> to </p>
+						<input class="inputrange" type="range" id="turnsPerWeekTo" min="1" max="7" step="1" value="7" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
+						<p class="checkLabel">(7)</p>
 					</div>
 				</div>
 			</div>
@@ -57,6 +69,7 @@
 		</div>
 		<h2>Changelog</h2>
 		<ul>
+			<li>v0.4 (2021-04-12) - Added filter for beginner games and turns per week</li> <!-- Pampelmops -->
 			<li>v0.3 (2021-04-06) - Added filter for difficulty modifier</li> <!-- Pampelmops -->
 			<li>v0.2 (2021-04-02) - Added status and type filters</li>
 			<li>v0.1 (2021-04-02) - Initial release</li>

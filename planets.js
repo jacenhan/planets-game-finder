@@ -53,7 +53,7 @@ function loadGames(args, callback) {
 
 	fetch("https://api.planets.nu/games/list" + args)
 		.then(response => response.json())
-		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - Pampelmops - Filter by game attributes
+		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - v0.3 - Pampelmops - Filter by game attributes
 		.then(data => {
 			data.sort(function(a, b) {
 				return Date.parse(b.datecreated) - Date.parse(a.datecreated);
@@ -63,7 +63,7 @@ function loadGames(args, callback) {
 		});
 }
 
-// 2021-04-06 - Pampelmops - Function to filter by game attributes
+// 2021-04-06 - v0.3 - Pampelmops - Function to filter by game attributes
 function filterByGameAttributes(game) {
 	// Difficulty Modifier
 	var item = document.getElementById("difficultyModifier");
@@ -71,6 +71,28 @@ function filterByGameAttributes(game) {
 		var from = document.getElementById("difficultyModifierFrom").value;
 		var to = document.getElementById("difficultyModifierTo").value;
 		if (game.difficulty < from  ||  game.difficulty > to) return false;
+	}
+	
+	// 2021-04-12 - v0.4 - Exclude beginner games
+	item = document.getElementById("excludeBeginner");
+	if (item.checked) {
+		if (game.shortdescription.includes("Beginners") ) return false;
+	}
+	
+	// 2021-04-12 - v0.4 - Turns per week
+	item = document.getElementById("turnsPerWeek");
+	if (item.checked) {
+		var from = document.getElementById("turnsPerWeekFrom").value;
+		var to = document.getElementById("turnsPerWeekTo").value;
+		if (game.turnsperweek > 0) { // Custom games apparently have turnsperweek=0
+			if (game.turnsperweek < from  ||  game.turnsperweek > to) return false;
+		}
+		else {
+			var count = (game.hostdays.match(/_/g) || []).length; // Count number of underscores
+			// console.log("game.hostdays: " + game.hostdays + ", count: " + count);
+			var turnCount = 7-count;
+			if (turnCount < from  ||  turnCount > to) return false;
+		}
 	}
 	
 	return true;
@@ -150,7 +172,7 @@ function gameDetailToHtml(gameDetail) {
 	box1.appendChild(created);
 	created.textContent = "Game created " + game.datecreated;
 	
-	// 2021-04-06 - Pampelmops - Show difficulty modifier and host days
+	// 2021-04-06 - v0.3 - Pampelmops - Show difficulty modifier and host days
 
 	// Difficulty modifier
 	var difficulty = document.createElement("p");
