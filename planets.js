@@ -5,18 +5,22 @@ function findJoining() {
 	removeAllChildNodes(gameList);
 
 	loadGames("?" + getQueryParams(), function(val) {
-		console.log(val);
+		//console.log(val);
 
-		getDetailsOfGames(val).then(data => {
-			// Update html
-			var numText = document.getElementById("numGames");
-			numText.textContent = "Found " + val.length + " games";
+		getDetailsOfGames(val)
+			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
+			.then (data => setLastQuitEvent(data))
+			.then (data => sortGames(data))
+			.then(data => {
+				// Update html
+				var numText = document.getElementById("numGames");
+				numText.textContent = "Found " + val.length + " games";
 
-			console.log(data);
-			for (var i = 0; i < data.length; i++) {
-				gameList.appendChild(gameDetailToHtml(data[i]));
-			}
-		});
+				//console.log(data);
+				for (var i = 0; i < data.length; i++) {
+					gameList.appendChild(gameDetailToHtml(data[i]));
+				}
+			});
 	});
 }
 
@@ -32,17 +36,72 @@ function findReplacements() {
 			}
 		}
 
-		getDetailsOfGames(newlist).then(data => {
-			// Update html
-			var numText = document.getElementById("numGames");
-			numText.textContent = "Found " + newlist.length + " games";
+		getDetailsOfGames(newlist)
+			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
+			.then (data => setLastQuitEvent(data))
+			.then (data => sortGames(data))
+			.then(data => {
+				// Update html
+				var numText = document.getElementById("numGames");
+				numText.textContent = "Found " + newlist.length + " games";
 
-			console.log(data);
-			for (var i = 0; i < data.length; i++) {
-				gameList.appendChild(gameDetailToHtml(data[i]));
-			}
-		});
+				//console.log(data);
+				for (var i = 0; i < data.length; i++) {
+					gameList.appendChild(gameDetailToHtml(data[i]));
+				}
+			});
 	});
+}
+
+// 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
+function sortGames(gameList) {	
+	var func;
+	
+	var item = document.getElementById("sortingDesc");
+	var sortDesc = item.checked;
+	
+	// Sort by date created
+	item = document.getElementById("sortingDateCreated");
+	if (item.checked == true) {
+		if (sortDesc) func = function(a, b) {return Date.parse(b.game.datecreated) - Date.parse(a.game.datecreated);};
+		else func = function(a, b) {return Date.parse(a.game.datecreated) - Date.parse(b.game.datecreated);};
+	}
+	
+	// Sort by last quit event date
+	item = document.getElementById("sortingLastQuitEvent");
+	if (item.checked == true) {
+		var parseLastQuitEventDate = function (e) {
+			if (e) return Date.parse(e.dateadded);
+			return Date(0);
+		};
+		
+		if (sortDesc) func = function(a, b) {return parseLastQuitEventDate(b.lastQuitEvent) - parseLastQuitEventDate(a.lastQuitEvent);};
+		else func = function(a, b) {return parseLastQuitEventDate(a.lastQuitEvent) - parseLastQuitEventDate(b.lastQuitEvent);};
+	}
+	
+	return gameList.sort(func);
+}
+
+// 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
+function setLastQuitEvent(gameList) {	
+	for (var i=0; i<gameList.length; ++i) {
+		gameList[i].lastQuitEvent= getLastQuitEvent(gameList[i]);
+	}
+	
+	return gameList;
+}
+
+// 2021-04-18 - v0.5 - Pampelmops - Get timestamp of last quit event (resigned or dropped) for sorting
+function getLastQuitEvent(fullGame) {	
+	for (var i=0; i<fullGame.events.length; ++i) {
+		var e = fullGame.events[i];
+		if (e.eventtype === 8  ||  e.eventtype === 10) { // Resigned or dropped after missing turns
+			//console.log("return: " + e.dateadded);
+			return e;
+		}
+	}
+	
+	return null;
 }
 
 function loadGames(args, callback) {
@@ -54,10 +113,11 @@ function loadGames(args, callback) {
 	fetch("https://api.planets.nu/games/list" + args)
 		.then(response => response.json())
 		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - v0.3 - Pampelmops - Filter by game attributes
+		// 2021-04-18 - v0.5 - Pampelmops - Don't sort here but later with game details available
 		.then(data => {
-			data.sort(function(a, b) {
-				return Date.parse(b.datecreated) - Date.parse(a.datecreated);
-			})
+			/*data.sort(function(a, b) {
+				return Date.parse(b.datecreated) - Date.parse(a.datecreated);  // Descending default
+			})*/
 
 			callback(data);
 		});
@@ -73,13 +133,13 @@ function filterByGameAttributes(game) {
 		if (game.difficulty < from  ||  game.difficulty > to) return false;
 	}
 	
-	// 2021-04-12 - v0.4 - Exclude beginner games
+	// 2021-04-12 - v0.4 - Pampelmops - Exclude beginner games
 	item = document.getElementById("excludeBeginner");
 	if (item.checked) {
 		if (game.shortdescription.includes("Beginners") ) return false;
 	}
 	
-	// 2021-04-12 - v0.4 - Turns per week
+	// 2021-04-12 - v0.4 - Pampelmops - Turns per week
 	item = document.getElementById("turnsPerWeek");
 	if (item.checked) {
 		var from = document.getElementById("turnsPerWeekFrom").value;
@@ -193,6 +253,14 @@ function gameDetailToHtml(gameDetail) {
 	var description = document.createElement("p");
 	box2.appendChild(description);
 	description.innerHTML = game.description;
+
+	// // 2021-04-18 - v0.5 - Pampelmops - Date last quit event
+	if (gameDetail.lastQuitEvent) {
+		var lastQuitEvent = document.createElement("p");
+		lastQuitEvent.className = "gameItemDateLastQuitEvent";
+		box2.appendChild(lastQuitEvent);
+		lastQuitEvent.textContent = "Last quit event (dropped or resigned): " + gameDetail.lastQuitEvent.dateadded;
+	}
 
 	return container;
 }
