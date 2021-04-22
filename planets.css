@@ -18,7 +18,7 @@ body {
 	padding: 20px;
 }
 
-#pageContainer {
+.pageContainer {
 	max-width: 1400px;
 	margin: auto;
 
@@ -37,7 +37,7 @@ body {
 	opacity: 0.95;
 }
 
-#filterBox {
+.selectionBox {
 	margin: 10px;
 	padding: 10px;
 	
@@ -45,14 +45,14 @@ body {
 	border-radius: 10px;
 }
 
-#filterTitle {
+.selectionTitle {
 	margin: 0;
 	font-size: 1.8em;
 	border-bottom: 1px solid #bbcccc;
 	padding: 5px;
 }
 
-#filtersContainer {
+.selectionContainer {
 	display: flex;
 	flex-direction: row;
 }
@@ -64,7 +64,24 @@ body {
 	text-align: center;
 }
 
+.sortingName {
+	margin: 5px;
+
+	font-size: 1.4em;
+	text-align: center;
+}
+
 .filterList {
+	width: auto;
+	margin: 10px;
+	min-width: 150px;
+
+	display: inline-flex;
+	flex-direction: column;
+	padding: 3px;
+}
+
+.sortingList {
 	width: auto;
 	margin: 10px;
 	min-width: 150px;
@@ -87,7 +104,25 @@ body {
 	width: auto;
 }
 
+.radioContainer {
+	margin: 1px;
+	margin-left: 10px;
+	margin-right: 10px;
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+	justify-content: start;
+	vertical-align: middle;
+	align-items: center;
+	width: auto;
+}
+
 .statuscheckbox {
+	width: 18px;
+	height: 18px;
+}
+
+.radioCheckbox {
 	width: 18px;
 	height: 18px;
 }
@@ -98,6 +133,15 @@ body {
 }
 
 .checkLabel {
+	font-size: 1.2em;
+	margin: 0;
+	margin-left: 5px;
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.radioLabel {
 	font-size: 1.2em;
 	margin: 0;
 	margin-left: 5px;
