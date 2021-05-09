@@ -19,11 +19,11 @@ body {
 }
 
 .pageContainer {
-	max-width: 1400px;
+	max-width: 1600px;
 	margin: auto;
 
-	margin-top: 50px;
-	margin-bottom: 50px;
+	margin-top: 25px;
+	margin-bottom: 25px;
 	padding: 20px;
 	
 	border-radius: 10px;
@@ -56,7 +56,7 @@ body {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	justify-content: space-evenly;
+	justify-content: left;
 }
 
 .filterName {
@@ -81,6 +81,10 @@ body {
 	display: inline-flex;
 	flex-direction: column;
 	padding: 3px;
+	padding-bottom: 8px;
+
+	background-color: #202020;
+	border-radius: 10px;
 }
 
 .sortingList {
@@ -152,6 +156,27 @@ body {
 	text-align: center;
 }
 
+#buttonContainer {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+.mainButton {
+	padding: 10px;
+	font-size: 1.5em;
+	background-color: #2c2c2c;
+	box-shadow: 0 0 5px 1px black;
+	color: white;
+	border: 1px solid #080808;
+	border-radius: 5px;
+}
+
+.mainButton:hover {
+	cursor: pointer;
+	background-color: #373737;
+}
+
 #games {
 	display: flex;
 	flex-direction: column;
@@ -171,8 +196,17 @@ body {
 	border-top: solid 1px #bbcccc;
 }
 
+.gameItemBox {
+	padding: 8px;
+	min-width: 250px;
+}
+
 .box1 {
-	min-width: 300px;
+	width: 300px;
+}
+
+.box3 {
+	width: 250px;
 }
 
 a {
@@ -208,6 +242,11 @@ a {
 	position: absolute;
 }
 
+.gameItemSlots:hover {
+	cursor: pointer;
+}
+
 .gameItemSlots:hover > .gameItemSlotsLong {
 	display: block;
+	cursor: pointer;
 }
