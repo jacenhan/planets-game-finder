@@ -4,6 +4,7 @@ This is a fan-made third-party tool for finding games in VGA Planets Nu. It allo
 
 # Changelog
 
+- v0.6 (2021-05-08) - Back-end rework, open slots filter \[Jacenhan]
 - v0.5 (2021-04-18) - Added sorting and date of last quit event \[Pampelmops]
 - v0.4 (2021-04-12) - Added filter for beginner games & turns/week \[Pampelmops]
 - v0.3 (2021-04-06) - Added filter for difficulty modifier \[Pampelmops]
