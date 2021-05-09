@@ -1,130 +1,61 @@
-// Planets game finder
+/*
 
-function findJoining() {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
+App run structure:
 
-	loadGames("?" + getQueryParams(), function(val) {
-		//console.log(val);
+1. Get search params for Game Summary List
+2. Get the Game Summary List from the api
+3. Filter that list for things we couldn't set params for
+4. For each remaining game, get game details
+5. Filter the detailed games
+6. Sort the games
+7. Show the games
 
-		getDetailsOfGames(val)
-			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
-			.then (data => setLastQuitEvent(data))
-			.then (data => sortGames(data))
-			.then(data => {
-				// Update html
-				var numText = document.getElementById("numGames");
-				numText.textContent = "Found " + val.length + " games";
+*/
 
-				//console.log(data);
-				for (var i = 0; i < data.length; i++) {
-					gameList.appendChild(gameDetailToHtml(data[i]));
-				}
-			});
-	});
+import * as Display from './display.js';
+
+async function runSearch() {
+	// Get game summary list
+	const gameSummaryList = await getGameSummaryList();
+	console.log(gameSummaryList);
+
+	// Filter the game summary list
+	const filteredGameSummaryList = filterGameSummaryList(gameSummaryList);
+	console.log(filteredGameSummaryList);
+
+	// Get the game details list
+	//const gameDetailsList = getGameDetailsList(filteredGameSummaryList);
+
+	// Filter the game details list
+	//const filteredGameDetailsList = filterGameDetailsList(gameDetailsList);
+
+	// Sort the game details list
+	//const sortedFilteredGameDetailsList = sortGameDetailsList(filteredGameDetailsList)
+
+	// Display the games to the user
+	//Display.displayGameList(sortedFilteredGameDetailsList);
 }
 
-function findReplacements() {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
+async function getGameSummaryList() {
+	const searchParams = getGameSummarySearchParams();
+	const url = "https://api.planets.nu/games/list?" + searchParams;
 
-	loadGames("?" + getQueryParams(), function(val) {
-		var newlist = [];
-		for (var i = 0; i < val.length; i++) {
-			if (val[i].turnstatus.includes("o")) {
-				newlist.push(val[i]);
-			}
-		}
+	Display.displaySearching();
 
-		getDetailsOfGames(newlist)
-			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
-			.then (data => setLastQuitEvent(data))
-			.then (data => sortGames(data))
-			.then(data => {
-				// Update html
-				var numText = document.getElementById("numGames");
-				numText.textContent = "Found " + newlist.length + " games";
-
-				//console.log(data);
-				for (var i = 0; i < data.length; i++) {
-					gameList.appendChild(gameDetailToHtml(data[i]));
-				}
-			});
-	});
-}
-
-// 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
-function sortGames(gameList) {	
-	var func;
-	
-	var item = document.getElementById("sortingDesc");
-	var sortDesc = item.checked;
-	
-	// Sort by date created
-	item = document.getElementById("sortingDateCreated");
-	if (item.checked == true) {
-		if (sortDesc) func = function(a, b) {return Date.parse(b.game.datecreated) - Date.parse(a.game.datecreated);};
-		else func = function(a, b) {return Date.parse(a.game.datecreated) - Date.parse(b.game.datecreated);};
-	}
-	
-	// Sort by last quit event date
-	item = document.getElementById("sortingLastQuitEvent");
-	if (item.checked == true) {
-		var parseLastQuitEventDate = function (e) {
-			if (e) return Date.parse(e.dateadded);
-			return Date(0);
-		};
-		
-		if (sortDesc) func = function(a, b) {return parseLastQuitEventDate(b.lastQuitEvent) - parseLastQuitEventDate(a.lastQuitEvent);};
-		else func = function(a, b) {return parseLastQuitEventDate(a.lastQuitEvent) - parseLastQuitEventDate(b.lastQuitEvent);};
-	}
-	
-	return gameList.sort(func);
-}
-
-// 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
-function setLastQuitEvent(gameList) {	
-	for (var i=0; i<gameList.length; ++i) {
-		gameList[i].lastQuitEvent= getLastQuitEvent(gameList[i]);
-	}
-	
-	return gameList;
-}
-
-// 2021-04-18 - v0.5 - Pampelmops - Get timestamp of last quit event (resigned or dropped) for sorting
-function getLastQuitEvent(fullGame) {	
-	for (var i=0; i<fullGame.events.length; ++i) {
-		var e = fullGame.events[i];
-		if (e.eventtype === 8  ||  e.eventtype === 10) { // Resigned or dropped after missing turns
-			//console.log("return: " + e.dateadded);
-			return e;
-		}
-	}
-	
-	return null;
-}
-
-function loadGames(args, callback) {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
-	var numText = document.getElementById("numGames");
-	numText.textContent = "Searching...";
-
-	fetch("https://api.planets.nu/games/list" + args)
+	const response = await fetch(url)
 		.then(response => response.json())
-		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - v0.3 - Pampelmops - Filter by game attributes
-		// 2021-04-18 - v0.5 - Pampelmops - Don't sort here but later with game details available
-		.then(data => {
-			/*data.sort(function(a, b) {
-				return Date.parse(b.datecreated) - Date.parse(a.datecreated);  // Descending default
-			})*/
+		.then(data => { return data });
+	
+	return response;
+}
 
-			callback(data);
-		});
+function filterGameSummaryList(gameSummaryList) {
+	const filtered = gameSummaryList.filter(gameAttributeFilter);
+	return filtered;
 }
 
 // 2021-04-06 - v0.3 - Pampelmops - Function to filter by game attributes
-function filterByGameAttributes(game) {
+function gameAttributeFilter(game) {
 	// Difficulty Modifier
 	var item = document.getElementById("difficultyModifier");
 	if (item.checked) {
@@ -158,137 +89,26 @@ function filterByGameAttributes(game) {
 	return true;
 }
 
-function gameDetailToHtml(gameDetail) {
-	var game = gameDetail.game;
-
-	// Make game container
-	var container = document.createElement("div");
-	container.className = "gameContainer";
-
-	// Make box 1 (leftmost)
-	var box1 = document.createElement("div");
-	container.appendChild(box1);
-
-	// Sector Name
-	var name = document.createElement("h3");
-	name.className = "gameItemName";
-	box1.className = "box1";
-	
-	var link = document.createElement("a");
-	link.textContent = game.name;
-	link.href = "https://planets.nu/#/sector/" + game.id;
-	link.target = "_blank";
-	link.className = "gameLink";
-	name.appendChild(link);
-	box1.appendChild(name);
-
-	// Short description
-	var shortDesc = document.createElement("p");
-	shortDesc.className = "gameItemShortDesc";
-	shortDesc.textContent = game.shortdescription;
-	box1.appendChild(shortDesc);
-
-	// Turn counter and status
-	var turnCounter = document.createElement("p");
-	turnCounter.className = "gameItemTurnCounter";
-	turnCounter.textContent = "Turn " + game.turn + " - " + game.statusname;
-	box1.appendChild(turnCounter);
-
-	// Open slots
-	var open = [];
-	for (var i = 0; i < gameDetail.players.length; i++) {
-		if (gameDetail.players[i].status == 0) {
-			open.push(gameDetail.players[i]);
-		}
-	}
-
-	var slotsText = (gameDetail.game.slots - open.length) + "/" + gameDetail.game.slots + " slots filled.";
-	var slotsTextLong = "";
-	if (open.length > 0) {
-		slotsTextLong = "Remaining slots: ";
-		for (var i = 0; i < open.length; i++) {
-			slotsTextLong += raceIdToString(open[i].raceid);
-			if (i != open.length - 1) {
-				slotsTextLong += ", ";
-			}
-		}
-	}
-
-	var slots = document.createElement("p");
-	slots.className = "gameItemSlots";
-	slots.textContent = slotsText;
-	box1.appendChild(slots);
-
-	if (open.length > 0) {
-		var slotsBox = document.createElement("div");
-		slotsBox.className = "gameItemSlotsLong";
-		slotsBox.textContent = slotsTextLong;
-		slots.appendChild(slotsBox);
-	}
-
-	// Date created
-	var created = document.createElement("p");
-	created.className = "gameItemDateCreated";
-	box1.appendChild(created);
-	created.textContent = "Game created " + game.datecreated;
-	
-	// 2021-04-06 - v0.3 - Pampelmops - Show difficulty modifier and host days
-
-	// Difficulty modifier
-	var difficulty = document.createElement("p");
-	difficulty.className = "gameItemDifficulty";
-	box1.appendChild(difficulty);
-	difficulty.textContent = "Difficulty Modifier: " + Math.round(game.difficulty*100)/100;
-
-	// Host days
-	var hostDays = document.createElement("p");
-	hostDays.className = "gameItemHostDays";
-	box1.appendChild(hostDays);
-	hostDays.textContent = "Host days: " + game.hostdays;
-
-	// Box 2
-	var box2 = document.createElement("div");
-	container.appendChild(box2);
-
-	var description = document.createElement("p");
-	box2.appendChild(description);
-	description.innerHTML = game.description;
-
-	// // 2021-04-18 - v0.5 - Pampelmops - Date last quit event
-	if (gameDetail.lastQuitEvent) {
-		var lastQuitEvent = document.createElement("p");
-		lastQuitEvent.className = "gameItemDateLastQuitEvent";
-		box2.appendChild(lastQuitEvent);
-		lastQuitEvent.textContent = "Last quit event (dropped or resigned): " + gameDetail.lastQuitEvent.dateadded;
-	}
-
-	return container;
-}
-
-function getDetailsOfGames(games) {
-	const promises = [];
-	
-	for (var i = 0; i < games.length; i++) {
-		promises.push(getIndividualGame(games[i].id));
-	}
-
-	return Promise.all(promises);
-}
-
-function getIndividualGame(id) {
-	return fetch("https://api.planets.nu/game/loadinfo?gameid=" + id)
-		.then(response => response.json())
-		.then(data => {
-			return data;
-		});
-}
-
-function getQueryParams() {
-	// Game status
-	var status = "status=";
+function getGameSummarySearchParams() {
+	// Game scope
+	var scope = "scope=";
 	var first = true;
 
-	var item = document.getElementById("interest");
+	var item = document.getElementById("public");
+	if (item.checked == true) { scope += "0"; first = false; }
+
+	item = document.getElementById("private");
+	if (item.checked == true) { if (!first) { status += "," } status += "1"; first = false; }
+
+	if (first) {
+		scope = "scope=0";
+	}
+
+	// Game status
+	var status = "status=";
+	first = true;
+
+	item = document.getElementById("interest");
 	if (item.checked == true) { status += "0"; first = false; }
 
 	item = document.getElementById("joining");
@@ -336,44 +156,5 @@ function getQueryParams() {
 		type = "type=2,3,4";
 	}
 
-	return status + "&" + type;
-}
-
-function raceIdToString(id) {
-	switch (id) {
-		case 0:
-			return "Any Race";
-		case 1:
-			return "The Feds";
-		case 2:
-			return "The Lizard Alliance";
-		case 3:
-			return "The Bird Men";
-		case 4:
-			return "The Fascists";
-		case 5:
-			return "The Privateers";
-		case 6:
-			return "The Cyborg";
-		case 7:
-			return "The Crystals";
-		case 8:
-			return "The Evil Empire";
-		case 9:
-			return "The Robots";
-		case 10:
-			return "The Rebels";
-		case 11:
-			return "The Colonies";
-		case 12:
-			return "The Horwasp";
-		default:
-			return "Unknown Race";
-	}
-}
-
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
+	return scope + "&" + status + "&" + type;
 }

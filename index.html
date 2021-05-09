@@ -13,6 +13,11 @@
 		<div class="selectionBox">
 			<h2 class="selectionTitle">Filters</h2>
 			<div class="selectionContainer">
+				<div class="filterList" id="gameScope">
+					<p class="filterName">Game Scope</p>
+					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="public" checked/><p class="checkLabel">Public</p></div>
+					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="private"/><p class="checkLabel">Private</p></div>
+				</div>
 				<div class="filterList" id="gameStatuses">
 					<p class="filterName">Current Status</p>
 					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="interest" /><p class="checkLabel">Interest</p></div>
@@ -75,8 +80,7 @@
 				</div>
 			</div>
 		</div>
-		<button id="buttonSearch" onclick="findJoining()">Search All Sectors</button>
-		<button id="buttonSearch" onclick="findReplacements()">Find Sectors Needing Replacements</button>
+		<button id="buttonSearch" onclick="runSearch()">Search For Games</button>
 		<div id="searchContainer">
 			<p id="numGames"></p>
 			<div id="games">
@@ -94,6 +98,6 @@
 	</div>
 </body>
 
-<script src="planets.js"></script>
+<script type="module" src="planets.js"></script>
 
 </html>
