@@ -1,75 +1,94 @@
-// Planets game finder
+/*
 
-function findJoining() {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
+App run structure:
 
-	loadGames("?" + getQueryParams(), function(val) {
-		//console.log(val);
+1. Get search params for Game Summary List
+2. Get the Game Summary List from the api
+3. Filter that list for things we couldn't set params for
+4. For each remaining game, get game details
+5. Filter the detailed games
+6. Sort the games
+7. Show the games
 
-		getDetailsOfGames(val)
-			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
-			.then (data => setLastQuitEvent(data))
-			.then (data => sortGames(data))
-			.then(data => {
-				// Update html
-				var numText = document.getElementById("numGames");
-				numText.textContent = "Found " + val.length + " games";
+*/
 
-				//console.log(data);
-				for (var i = 0; i < data.length; i++) {
-					gameList.appendChild(gameDetailToHtml(data[i]));
-				}
-			});
-	});
+const planetsUrl = "https://api.planets.nu/";
+
+async function runSearch() {
+	// Get game summary list
+	document.documentElement.style.cursor = "progress";
+	const gameSummaryList = await getGameSummaryList();
+
+	// Filter the game summary list
+	const filteredGameSummaryList = filterGameSummaryList(gameSummaryList);
+
+	// Get the game details list
+	const gameDetailsList = await getGameDetailsList(filteredGameSummaryList);
+
+	// Filter the game details list
+	const filteredGameDetailsList = filterGameDetailsList(gameDetailsList);
+
+	// Sort the game details list
+	const sortedFilteredGameDetailsList = sortGameDetailsList(filteredGameDetailsList)
+
+	// Display the games to the user
+	document.documentElement.style.cursor = "default";
+	displayGameList(sortedFilteredGameDetailsList);
 }
 
-function findReplacements() {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
+async function getGameSummaryList() {
+	const searchParams = getGameSummarySearchParams();
+	const url = planetsUrl + "games/list?limit=500&" + searchParams;
 
-	loadGames("?" + getQueryParams(), function(val) {
-		var newlist = [];
-		for (var i = 0; i < val.length; i++) {
-			if (val[i].turnstatus.includes("o")) {
-				newlist.push(val[i]);
-			}
-		}
+	displaySearching();
 
-		getDetailsOfGames(newlist)
-			// 2021-04-18 - v0.5 - Pampelmops - Sort before rendering html
-			.then (data => setLastQuitEvent(data))
-			.then (data => sortGames(data))
-			.then(data => {
-				// Update html
-				var numText = document.getElementById("numGames");
-				numText.textContent = "Found " + newlist.length + " games";
+	const response = await fetch(url)
+		.then(response => response.json())
+		.then(data => { return data });
+	
+	return response;
+}
 
-				//console.log(data);
-				for (var i = 0; i < data.length; i++) {
-					gameList.appendChild(gameDetailToHtml(data[i]));
-				}
-			});
-	});
+function filterGameSummaryList(gameSummaryList) {
+	const filtered = gameSummaryList.filter(gameAttributeFilter);
+	return filtered;
+}
+
+async function getGameDetailsList(filteredGameSummaryList) {
+	const promises = [];
+
+	for (var i = 0; i < filteredGameSummaryList.length; i++) {
+		promises.push(getGameDetails(filteredGameSummaryList[i].id));
+	}
+
+	const result = await Promise.all(promises)
+		.then(response => {
+			return response;
+		});
+	
+	return result;
+}
+
+function filterGameDetailsList(gameDetailsList) {
+	return gameDetailsList;
 }
 
 // 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
-function sortGames(gameList) {	
+function sortGameDetailsList(filteredGameDetailsList) {
 	var func;
 	
-	var item = document.getElementById("sortingDesc");
-	var sortDesc = item.checked;
+	var sortDesc = document.getElementById("sortingDesc").checked;
 	
+	var sortByDateElement = document.getElementById("sortingDateCreated");
+	var sortByQuitElement = document.getElementById("sortingLastQuitEvent");
+
 	// Sort by date created
-	item = document.getElementById("sortingDateCreated");
-	if (item.checked == true) {
+	if (sortByDateElement.checked == true) {
 		if (sortDesc) func = function(a, b) {return Date.parse(b.game.datecreated) - Date.parse(a.game.datecreated);};
 		else func = function(a, b) {return Date.parse(a.game.datecreated) - Date.parse(b.game.datecreated);};
 	}
-	
 	// Sort by last quit event date
-	item = document.getElementById("sortingLastQuitEvent");
-	if (item.checked == true) {
+	else if (sortByQuitElement.checked == true) {
 		var parseLastQuitEventDate = function (e) {
 			if (e) return Date.parse(e.dateadded);
 			return Date(0);
@@ -79,52 +98,22 @@ function sortGames(gameList) {
 		else func = function(a, b) {return parseLastQuitEventDate(a.lastQuitEvent) - parseLastQuitEventDate(b.lastQuitEvent);};
 	}
 	
-	return gameList.sort(func);
+	return filteredGameDetailsList.sort(func);
 }
 
-// 2021-04-18 - v0.5 - Pampelmops - Set timestamp of last quit event (resigned or dropped) for sorting
-function setLastQuitEvent(gameList) {	
-	for (var i=0; i<gameList.length; ++i) {
-		gameList[i].lastQuitEvent= getLastQuitEvent(gameList[i]);
-	}
-	
-	return gameList;
-}
+function getGameDetails(gameId) {
+	const url = planetsUrl + "game/loadinfo?gameid=" + gameId;
 
-// 2021-04-18 - v0.5 - Pampelmops - Get timestamp of last quit event (resigned or dropped) for sorting
-function getLastQuitEvent(fullGame) {	
-	for (var i=0; i<fullGame.events.length; ++i) {
-		var e = fullGame.events[i];
-		if (e.eventtype === 8  ||  e.eventtype === 10) { // Resigned or dropped after missing turns
-			//console.log("return: " + e.dateadded);
-			return e;
-		}
-	}
-	
-	return null;
-}
-
-function loadGames(args, callback) {
-	var gameList = document.getElementById("games");
-	removeAllChildNodes(gameList);
-	var numText = document.getElementById("numGames");
-	numText.textContent = "Searching...";
-
-	fetch("https://api.planets.nu/games/list" + args)
+	return fetch(url)
 		.then(response => response.json())
-		.then(data => data.filter(filterByGameAttributes)) // 2021-04-06 - v0.3 - Pampelmops - Filter by game attributes
-		// 2021-04-18 - v0.5 - Pampelmops - Don't sort here but later with game details available
 		.then(data => {
-			/*data.sort(function(a, b) {
-				return Date.parse(b.datecreated) - Date.parse(a.datecreated);  // Descending default
-			})*/
-
-			callback(data);
+			return data;
 		});
 }
 
 // 2021-04-06 - v0.3 - Pampelmops - Function to filter by game attributes
-function filterByGameAttributes(game) {
+// Comparison function to filter the game summary list (before getting game details)
+function gameAttributeFilter(game) {
 	// Difficulty Modifier
 	var item = document.getElementById("difficultyModifier");
 	if (item.checked) {
@@ -137,6 +126,14 @@ function filterByGameAttributes(game) {
 	item = document.getElementById("excludeBeginner");
 	if (item.checked) {
 		if (game.shortdescription.includes("Beginners") ) return false;
+	}
+
+	// Open slots filter
+	item = document.getElementById("needReplacement");
+	if (item.checked) {
+		if ((game.turnstatus.match(/o/g) || []).length == 0) {
+			return false;
+		}
 	}
 	
 	// 2021-04-12 - v0.4 - Pampelmops - Turns per week
@@ -158,6 +155,83 @@ function filterByGameAttributes(game) {
 	return true;
 }
 
+function getGameSummarySearchParams() {
+	// Game status
+	var status = "status=";
+	var first = true;
+
+	item = document.getElementById("interest");
+	if (item.checked == true) { status += "0"; first = false; }
+
+	item = document.getElementById("joining");
+	if (item.checked == true) { if (!first) { status += "," } status += "1"; first = false; }
+
+	item = document.getElementById("running");
+	if (item.checked == true) { if (!first) { status += "," } status += "2"; first = false; }
+
+	item = document.getElementById("finished");
+	if (item.checked == true) { if (!first) { status += "," } status += "3"; first = false; }
+
+	item = document.getElementById("onhold");
+	if (item.checked == true) { if (!first) { status += "," } status += "4"; first = false; }
+
+	if (first) {
+		status = "status=1,2";
+	}
+
+	// Game types
+	var type = "type=";
+	first = true;
+
+	item = document.getElementById("training");
+	if (item.checked == true) { type += "1"; first = false; }
+
+	item = document.getElementById("classic");
+	if (item.checked == true) { if (!first) { type += "," } type += "2"; first = false; }
+
+	item = document.getElementById("team");
+	if (item.checked == true) { if (!first) { type += "," } type += "3"; first = false; }
+
+	item = document.getElementById("melee");
+	if (item.checked == true) { if (!first) { type += "," } type += "4"; first = false; }
+
+	item = document.getElementById("blitz");
+	if (item.checked == true) { if (!first) { type += "," } type += "5"; first = false; }
+
+	item = document.getElementById("champion");
+	if (item.checked == true) { if (!first) { type += "," } type += "6"; first = false; }
+
+	item = document.getElementById("academy");
+	if (item.checked == true) { if (!first) { type += "," } type += "7"; first = false; }
+
+	if (first) {
+		type = "type=2,3,4";
+	}
+
+	return status + "&" + type;
+}
+
+/*
+	Display functions for the app
+*/
+
+function clearList() {
+	var gameList = document.getElementById("games");
+	removeAllChildNodes(gameList);
+}
+
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
+function displaySearching() {
+	clearList();
+	var numText = document.getElementById("numGames");
+	numText.textContent = "Searching...";
+}
+
 function gameDetailToHtml(gameDetail) {
 	var game = gameDetail.game;
 
@@ -168,11 +242,11 @@ function gameDetailToHtml(gameDetail) {
 	// Make box 1 (leftmost)
 	var box1 = document.createElement("div");
 	container.appendChild(box1);
+	box1.className = "box1 gameItemBox";
 
 	// Sector Name
 	var name = document.createElement("h3");
 	name.className = "gameItemName";
-	box1.className = "box1";
 	
 	var link = document.createElement("a");
 	link.textContent = game.name;
@@ -226,10 +300,18 @@ function gameDetailToHtml(gameDetail) {
 		slots.appendChild(slotsBox);
 	}
 
+	/*
+		Box 3 (middle) (yes I know they are out of order)
+	*/
+
+	var box3 = document.createElement("div");
+	container.appendChild(box3);
+	box3.className = "gameItemBox box3";
+
 	// Date created
 	var created = document.createElement("p");
 	created.className = "gameItemDateCreated";
-	box1.appendChild(created);
+	box3.appendChild(created);
 	created.textContent = "Game created " + game.datecreated;
 	
 	// 2021-04-06 - v0.3 - Pampelmops - Show difficulty modifier and host days
@@ -237,18 +319,21 @@ function gameDetailToHtml(gameDetail) {
 	// Difficulty modifier
 	var difficulty = document.createElement("p");
 	difficulty.className = "gameItemDifficulty";
-	box1.appendChild(difficulty);
+	box3.appendChild(difficulty);
 	difficulty.textContent = "Difficulty Modifier: " + Math.round(game.difficulty*100)/100;
 
 	// Host days
 	var hostDays = document.createElement("p");
 	hostDays.className = "gameItemHostDays";
-	box1.appendChild(hostDays);
+	box3.appendChild(hostDays);
 	hostDays.textContent = "Host days: " + game.hostdays;
 
-	// Box 2
+	/*
+		Box 2 (right)
+	*/
 	var box2 = document.createElement("div");
 	container.appendChild(box2);
+	box2.className = "gameItemBox";
 
 	var description = document.createElement("p");
 	box2.appendChild(description);
@@ -265,78 +350,16 @@ function gameDetailToHtml(gameDetail) {
 	return container;
 }
 
-function getDetailsOfGames(games) {
-	const promises = [];
+function displayGameList(gameDetailList) {
+	clearList();
+	var gameListElement = document.getElementById("games");
 	
-	for (var i = 0; i < games.length; i++) {
-		promises.push(getIndividualGame(games[i].id));
+	var numText = document.getElementById("numGames");
+	numText.textContent = "Found " + gameDetailList.length + " games";
+
+	for (var i = 0; i < gameDetailList.length; i++) {
+		gameListElement.appendChild(gameDetailToHtml(gameDetailList[i]));
 	}
-
-	return Promise.all(promises);
-}
-
-function getIndividualGame(id) {
-	return fetch("https://api.planets.nu/game/loadinfo?gameid=" + id)
-		.then(response => response.json())
-		.then(data => {
-			return data;
-		});
-}
-
-function getQueryParams() {
-	// Game status
-	var status = "status=";
-	var first = true;
-
-	var item = document.getElementById("interest");
-	if (item.checked == true) { status += "0"; first = false; }
-
-	item = document.getElementById("joining");
-	if (item.checked == true) { if (!first) { status += "," } status += "1"; first = false; }
-
-	item = document.getElementById("running");
-	if (item.checked == true) { if (!first) { status += "," } status += "2"; first = false; }
-
-	item = document.getElementById("finished");
-	if (item.checked == true) { if (!first) { status += "," } status += "3"; first = false; }
-
-	item = document.getElementById("onhold");
-	if (item.checked == true) { if (!first) { status += "," } status += "4"; first = false; }
-
-	if (first) {
-		status = "status=1,2";
-	}
-
-	// Game types
-	var type = "type=";
-	first = true;
-
-	item = document.getElementById("training");
-	if (item.checked == true) { type += "1"; first = false; }
-
-	item = document.getElementById("classic");
-	if (item.checked == true) { if (!first) { type += "," } type += "2"; first = false; }
-
-	item = document.getElementById("team");
-	if (item.checked == true) { if (!first) { type += "," } type += "3"; first = false; }
-
-	item = document.getElementById("melee");
-	if (item.checked == true) { if (!first) { type += "," } type += "4"; first = false; }
-
-	item = document.getElementById("blitz");
-	if (item.checked == true) { if (!first) { type += "," } type += "5"; first = false; }
-
-	item = document.getElementById("champion");
-	if (item.checked == true) { if (!first) { type += "," } type += "6"; first = false; }
-
-	item = document.getElementById("academy");
-	if (item.checked == true) { if (!first) { type += "," } type += "7"; first = false; }
-
-	if (first) {
-		type = "type=2,3,4";
-	}
-
-	return status + "&" + type;
 }
 
 function raceIdToString(id) {
@@ -370,10 +393,4 @@ function raceIdToString(id) {
 		default:
 			return "Unknown Race";
 	}
-}
-
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
 }

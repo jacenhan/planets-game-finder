@@ -34,6 +34,9 @@
 				<!-- 2021-04-06 - v0.3 - Pampelmops - New category for game attributes -->
 				<div class="filterList" id="gameAttributes">
 					<p class="filterName">Game Attributes</p>
+					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="needReplacement" checked/><p class="checkLabel">Has Open Slots</p></div>
+					<!-- 2021-04-12 - v0.4 - Exclude beginner games -->
+					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="excludeBeginner"/><p class="checkLabel">No Beginner games</p></div>
 					<!-- Difficulty modifier -->
 					<div class="checkboxContainer">
 						<input class="statuscheckbox" type="checkbox" id="difficultyModifier"/>
@@ -44,8 +47,6 @@
 						<input class="inputrange" type="range" id="difficultyModifierTo" min="0" max="2" step="0.1" value="1.5" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
 						<p class="checkLabel">(1.5)</p>
 					</div>
-					<!-- 2021-04-12 - v0.4 - Exclude beginner games -->
-					<div class="checkboxContainer"><input class="statuscheckbox" type="checkbox" id="excludeBeginner"/><p class="checkLabel">Exclude beginner games</p></div>
 					<!-- 2021-04-12 - v0.4 - Turns per week -->
 					<div class="checkboxContainer">
 						<input class="statuscheckbox" type="checkbox" id="turnsPerWeek"/>
@@ -58,25 +59,23 @@
 					</div>
 				</div>
 			</div>
-		</div>
-		
-		<div class="selectionBox">
 			<h2 class="selectionTitle">Sorting</h2>
 			<div class="selectionContainer">
-				<div class="sortingList" id="sortingAttributes">
+				<div class="filterList" id="sortingAttributes">
 					<p class="sortingName">Attributes</p>
 					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingDateCreated" checked/><p class="radioLabel">Date Created</p></div>
 					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingLastQuitEvent"/><p class="radioLabel">Last quit event</p></div>
 				</div>
-				<div class="sortingList" id="sortingOrder">
+				<div class="filterList" id="sortingOrder">
 					<p class="sortingName">Order</p>
 					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingOrderGroup" id="sortingDesc" checked/><p class="radioLabel">Descending</p></div>
 					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingOrderGroup" id="sortingAsc"/><p class="radioLabel">Ascending</p></div>
 				</div>
 			</div>
 		</div>
-		<button id="buttonSearch" onclick="findJoining()">Search All Sectors</button>
-		<button id="buttonSearch" onclick="findReplacements()">Find Sectors Needing Replacements</button>
+		<div id="buttonContainer">
+			<button class="mainButton" id="buttonSearch" onclick="runSearch()">Refresh Data</button>
+		</div>
 		<div id="searchContainer">
 			<p id="numGames"></p>
 			<div id="games">
@@ -85,6 +84,7 @@
 		</div>
 		<h2>Changelog</h2>
 		<ul>
+			<li>v0.6 (2021-05-08) - Back-end rework, open slots filter</li>
 			<li>v0.5 (2021-04-18) - Added sorting and show date of last quit event</li> <!-- Pampelmops -->
 			<li>v0.4 (2021-04-12) - Added filter for beginner games and turns per week</li> <!-- Pampelmops -->
 			<li>v0.3 (2021-04-06) - Added filter for difficulty modifier</li> <!-- Pampelmops -->
