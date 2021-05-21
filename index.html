@@ -7,7 +7,7 @@
 
 <body>
 	<div class="pageContainer">
-		<h1>Planets Nu Game Finder v0.5</h1>
+		<h1>Planets Nu Game Finder v0.7</h1>
 		<p>Use this tool to find games to join in <a href="https://planets.nu/" target="_blank">VGA Planets Nu</a>.</p>
 		<p>Click on a sector name to go to it on the Planets Nu site, and mouse over the number of slots to see what races are available to join as.</p>
 		<div class="selectionBox">
@@ -41,11 +41,11 @@
 					<div class="checkboxContainer">
 						<input class="statuscheckbox" type="checkbox" id="difficultyModifier"/>
 						<p class="checkLabel">Difficulty Modifier:</p>
-						<input class="inputrange" type="range" id="difficultyModifierFrom" min="0" max="2" step="0.1" value="0.5" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
+						<input class="inputrange" type="range" id="difficultyModifierFrom" min="0.5" max="2" step="0.1" value="0.5" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
 						<p class="checkLabel">(0.5)</p>
 						<p class="checkLabel"> to </p>
-						<input class="inputrange" type="range" id="difficultyModifierTo" min="0" max="2" step="0.1" value="1.5" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
-						<p class="checkLabel">(1.5)</p>
+						<input class="inputrange" type="range" id="difficultyModifierTo" min="0.5" max="2" step="0.1" value="2" oninput="this.nextElementSibling.textContent = '(' + this.value + ')'"/>
+						<p class="checkLabel">(2)</p>
 					</div>
 					<!-- 2021-04-12 - v0.4 - Turns per week -->
 					<div class="checkboxContainer">
@@ -64,7 +64,8 @@
 				<div class="filterList" id="sortingAttributes">
 					<p class="sortingName">Attributes</p>
 					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingDateCreated" checked/><p class="radioLabel">Date Created</p></div>
-					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingLastQuitEvent"/><p class="radioLabel">Last quit event</p></div>
+					<!--<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingDifficulty"/><p class="radioLabel">Difficulty Modifier</p></div>-->
+					<div class="radioContainer"><input class="radioCheckbox" type="radio" name="sortingAttributesGroup" id="sortingLastQuitEvent"/><p class="radioLabel">Last Quit Event</p></div>
 				</div>
 				<div class="filterList" id="sortingOrder">
 					<p class="sortingName">Order</p>
@@ -84,6 +85,7 @@
 		</div>
 		<h2>Changelog</h2>
 		<ul>
+			<li>v0.7 (2021-05-21) - Added sorting by difficulty</li>
 			<li>v0.6 (2021-05-08) - Back-end rework, open slots filter</li>
 			<li>v0.5 (2021-04-18) - Added sorting and show date of last quit event</li> <!-- Pampelmops -->
 			<li>v0.4 (2021-04-12) - Added filter for beginner games and turns per week</li> <!-- Pampelmops -->

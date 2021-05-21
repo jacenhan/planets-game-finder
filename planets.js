@@ -80,13 +80,21 @@ function sortGameDetailsList(filteredGameDetailsList) {
 	var sortDesc = document.getElementById("sortingDesc").checked;
 	
 	var sortByDateElement = document.getElementById("sortingDateCreated");
-	var sortByQuitElement = document.getElementById("sortingLastQuitEvent");
+	//var sortByQuitElement = document.getElementById("sortingLastQuitEvent");
+	var sortByDifficultyElement = document.getElementById("sortingDifficulty");
 
 	// Sort by date created
 	if (sortByDateElement.checked == true) {
 		if (sortDesc) func = function(a, b) {return Date.parse(b.game.datecreated) - Date.parse(a.game.datecreated);};
 		else func = function(a, b) {return Date.parse(a.game.datecreated) - Date.parse(b.game.datecreated);};
 	}
+	// Sort by difficulty
+	else if (sortByDifficultyElement.checked == true) {
+		if (sortDesc) func = function(a,b) {return b.game.difficulty - a.game.difficulty;}
+		else func = function(a,b) {return a.game.difficulty - b.game.difficulty;}
+	}
+
+	/* This doesn't seem to be working - JacenHan
 	// Sort by last quit event date
 	else if (sortByQuitElement.checked == true) {
 		var parseLastQuitEventDate = function (e) {
@@ -97,7 +105,7 @@ function sortGameDetailsList(filteredGameDetailsList) {
 		if (sortDesc) func = function(a, b) {return parseLastQuitEventDate(b.lastQuitEvent) - parseLastQuitEventDate(a.lastQuitEvent);};
 		else func = function(a, b) {return parseLastQuitEventDate(a.lastQuitEvent) - parseLastQuitEventDate(b.lastQuitEvent);};
 	}
-	
+	*/
 	return filteredGameDetailsList.sort(func);
 }
 
@@ -328,6 +336,14 @@ function gameDetailToHtml(gameDetail) {
 	box3.appendChild(hostDays);
 	hostDays.textContent = "Host days: " + game.hostdays;
 
+	// // 2021-04-18 - v0.5 - Pampelmops - Date last quit event
+	if (gameDetail.lastQuitEvent) {
+		var lastQuitEvent = document.createElement("p");
+		lastQuitEvent.className = "gameItemDateLastQuitEvent";
+		box3.appendChild(lastQuitEvent);
+		lastQuitEvent.textContent = "Last quit event (dropped or resigned): " + gameDetail.lastQuitEvent.dateadded;
+	}
+
 	/*
 		Box 2 (right)
 	*/
@@ -338,14 +354,6 @@ function gameDetailToHtml(gameDetail) {
 	var description = document.createElement("p");
 	box2.appendChild(description);
 	description.innerHTML = game.description;
-
-	// // 2021-04-18 - v0.5 - Pampelmops - Date last quit event
-	if (gameDetail.lastQuitEvent) {
-		var lastQuitEvent = document.createElement("p");
-		lastQuitEvent.className = "gameItemDateLastQuitEvent";
-		box2.appendChild(lastQuitEvent);
-		lastQuitEvent.textContent = "Last quit event (dropped or resigned): " + gameDetail.lastQuitEvent.dateadded;
-	}
 
 	return container;
 }
